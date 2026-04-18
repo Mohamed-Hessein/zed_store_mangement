@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+.vercel
+.functions
+.env.example
+node_modules/
+.env
+.log
+google-services.json
+

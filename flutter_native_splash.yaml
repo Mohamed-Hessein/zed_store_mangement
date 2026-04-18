@@ -1,0 +1,17 @@
+flutter_native_splash:
+  color: "#D9D9D9"
+  image: "assets/images/Main - Splash Screen Container.png"
+  fullscreen: true
+
+  android_12:
+    # خليه نفس اللون الفاتح عشان متبقاش سوداء
+    color: "#D9D9D9"
+
+    # تأكد إن الصورة دي لوجو فقط (بدون خلفية) وتكون مربعة
+    image: "assets/images/Group 5.png"
+
+    # اللون اللي ورا الأيقونة لو الصورة شفافة
+    icon_background_color: "#D9D9D9"
+
+    # لو مش محتاج علامة تجارية تحت، يفضل تشيل السطر ده للتجربة
+    # branding: 'assets/images/Rectangle 3.png'
