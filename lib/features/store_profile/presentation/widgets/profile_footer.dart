@@ -1,15 +1,16 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:zed_store_mangent/core/api/prefs_helper.dart';
 import 'package:zed_store_mangent/core/resources/app_colors.dart';
 import 'package:zed_store_mangent/core/resources/app_styles.dart';
 import 'package:zed_store_mangent/core/resources/app_strings.dart';
+import 'package:zed_store_mangent/core/resources/auto_route.gr.dart';
 import 'package:zed_store_mangent/di.dart';
-
 class ProfileFooter extends StatelessWidget {
-  final VoidCallback? onLogoutPressed;
+  final VoidCallback onLogoutPressed; // خليتها مطلوبة عشان نضمن إن الـ Bloc يتنادى
 
-  const ProfileFooter({super.key, this.onLogoutPressed});
+  const ProfileFooter({super.key, required this.onLogoutPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +19,7 @@ class ProfileFooter extends StatelessWidget {
         SizedBox(height: 32.h),
         Center(
           child: GestureDetector(
-            onTap: onLogoutPressed ?? () {
-              getIt<PrefsHelper>().clearData();
-            },
+            onTap: onLogoutPressed, // بينادي الـ Event اللي جاي من الـ Page
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

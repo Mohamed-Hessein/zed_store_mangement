@@ -5,6 +5,7 @@ import 'package:zed_store_mangent/features/store_profile/domain/usecase/get_stor
 import 'package:zed_store_mangent/features/store_profile/presentation/bloc/profile_event.dart';
 import 'package:zed_store_mangent/features/store_profile/presentation/bloc/profile_state.dart';
 
+import '../../../../core/api/prefs_helper.dart';
 import '../../../../core/resources/internet_checker.dart';
 import '../../../../di.dart';
 
@@ -15,6 +16,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileBloc(this.getStoreProfileUseCase) : super(const ProfileState()) {
     on<FetchStoreProfile>(_onFetchStoreProfile);
     on<LaunchZedSection>(_onLaunchZedSection);
+    on<LogoutPressed>((event, emit) async {
+      // 1. مسح البيانات
+      await getIt<PrefsHelper>().clearData();
+
+      // 2. إرسال حالة النجاح أو الخروج (حسب الـ States اللي عندك)
+      emit(state.copyWith(status: ProfileStatus.success,storeProfile: null));
+    });
   }
 
   Future<void> _onFetchStoreProfile(

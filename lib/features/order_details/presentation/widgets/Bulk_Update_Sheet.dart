@@ -177,6 +177,7 @@ class _BulkUpdateSheetState extends State<BulkUpdateSheet> {
         DropdownMenuItem(value: 'ready', child: Text('جاهز للشحن')),
         DropdownMenuItem(value: 'indelivery', child: Text('جاري التوصيل')),
         DropdownMenuItem(value: 'delivered', child: Text('تم التوصيل ✅')),
+        DropdownMenuItem(value: 'cancelled', child: Text('ملغي ❌', style: TextStyle(color: Colors.red))),
       ],
       onChanged: (v) => setState(() => _selectedStatus = v),
     );

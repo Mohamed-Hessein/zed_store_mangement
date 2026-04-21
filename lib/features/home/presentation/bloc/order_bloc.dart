@@ -8,6 +8,17 @@ import '../../../order_details/data/models/order_model.dart';
 import '../../domian/usecase/order_usecase.dart';
 import 'order_event.dart';
 import 'order_states.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart'; // المكتبة الجديدة
+
+import '../../../../core/resources/hive_helper.dart' show HiveCacheHelper;
+import '../../../../core/resources/internet_checker.dart';
+import '../../../../di.dart';
+import '../../../order_details/data/models/order_model.dart';
+import '../../domian/usecase/order_usecase.dart';
+import 'order_event.dart';
+import 'order_states.dart';
 
 @injectable
 class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
@@ -17,14 +28,14 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
 
     on<FetchOrdersEvent>((event, emit) async {
 
-      if (state.isPaginating || (event.isLoadMore && !state.hasMore)) return;
+     if (state.isPaginating || (event.isLoadMore && !state.hasMore)) return;
 
       try {
+        final int pageToFetch = event.isLoadMore ? state.currentPage : 1;
+
         if (event.isLoadMore) {
-
-          emit(state.copyWith(isPaginating: true));
+           emit(state.copyWith(isPaginating: true));
         } else {
-
 
           final cachedData = await HiveCacheHelper.getData<dynamic>(
             boxName: HiveCacheHelper.ordersBoxName,
@@ -36,23 +47,23 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
             emit(state.copyWith(
               status: OrdersRequestStatus.success,
               orders: orders,
-              currentPage: 1, 
+              currentPage: 1,
               hasMore: true,
             ));
           } else {
-            emit(state.copyWith(status: OrdersRequestStatus.loading, currentPage: 1, hasMore: true));
+            emit(state.copyWith(
+                status: OrdersRequestStatus.loading,
+                currentPage: 1,
+                hasMore: true
+            ));
           }
         }
 
-
-        if (!getIt<InternetConnectivity>().isConnected) {
+         if (!getIt<InternetConnectivity>().isConnected) {
           emit(state.copyWith(isPaginating: false));
           return;
         }
-
-
-
-        final result = await getOrdersUseCase.call(event.searchQuery,page: state.currentPage);
+   final result = await getOrdersUseCase.call(event.searchQuery, page: pageToFetch);
 
         result.fold(
               (failure) {
@@ -63,16 +74,12 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
             ));
           },
               (newOrdersList) {
+             final bool hasMore = newOrdersList.length >= 3;
 
-            final bool hasMore = newOrdersList.length >= 10;
-
-
-            final List<OrderModel> updatedList = event.isLoadMore
+             final List<OrderModel> updatedList = event.isLoadMore
                 ? [...(state.orders ?? []), ...newOrdersList]
                 : newOrdersList;
-
-
-            if (!event.isLoadMore) {
+    if (!event.isLoadMore) {
               HiveCacheHelper.saveData<List<OrderModel>>(
                 boxName: HiveCacheHelper.ordersBoxName,
                 key: 'all_orders',
@@ -84,7 +91,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
               status: OrdersRequestStatus.success,
               orders: updatedList,
               isPaginating: false,
-              currentPage: state.currentPage + 1, 
+              currentPage: pageToFetch + 1,
               hasMore: hasMore,
             ));
           },
@@ -96,7 +103,8 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           errorMessage: e.toString(),
         ));
       }
-    });
+    },
+      transformer: droppable(),  );
 
     on<UpdateOrdersLocalStatus>((event, emit) {
       if (state.orders != null) {
