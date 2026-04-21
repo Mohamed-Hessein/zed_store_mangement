@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/zid-webhook", "destination": "/api/zid-webhook" }
+  ]
+}
